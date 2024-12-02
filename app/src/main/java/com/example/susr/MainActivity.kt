@@ -4,27 +4,50 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.susr.CardInfo.AttendanceInfo
-import com.example.susr.CardInfo.PerformanceInfo
-import com.example.susr.CardInfo.ScheduleInfo
-import com.example.susr.CardInfo.StudentInfo
-import com.example.susr.CardInfo.SubjectInfo
-import com.example.susr.CardInfo.TeachersInfo
+import androidx.compose.ui.unit.dp
+import com.example.susr.cardInfo.AttendanceScreenInfo
+import com.example.susr.cardInfo.PerformanceScreen
+import com.example.susr.cardInfo.ScheduleScreen
+import com.example.susr.cardInfo.StudentScreen
+import com.example.susr.cardInfo.SubjectScreen
+import com.example.susr.cardInfo.TeacherScreen
+import com.example.susr.cardInfo.getDummyAttendance
+import com.example.susr.cardInfo.getDummyPerformances
+import com.example.susr.cardInfo.getDummySchedules
+import com.example.susr.cardInfo.getDummyStudents
+import com.example.susr.cardInfo.getDummySubjects
+import com.example.susr.cardInfo.getDummyTeachers
 import com.example.susr.ui.theme.SUSRTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,90 +61,73 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Student(
-    val id: Int,
-    val fullName: String,
-    val group: String,
-    val faculty: String,
-    val contacts: String,
-) {}
-
-public data class Teacher(
-    val id: Int,
-    val fullName: String,
-    val department: String,
-    val position: String,
-    val contacts: String,
-) {}
-
-public data class Subject(
-    val id: Int,
-    val name: String,
-    val hours: Int,
-    val semester: Int,
-) {}
-
-public data class Schedule(
-    val id: Int,
-    val date: String,
-    val time: String,
-    val classroom: String,
-    val group: String,
-    val subject: Subject,
-    val teacher: Teacher,
-) {}
-
-public data class Attendance(
-    val id: Int,
-    val date: String,
-    val student: String,
-    val subject: String,
-    val status: String,
-) {}
-
-public data class Performance(
-    val id: String,
-    val student: String,
-    val subject: String,
-    val grade: Float,
-    val date: String,
-) {}
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf("Students", "Teachers", "Subjects", "Schedule", "Attendance", "Performance")
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("SUSR") }
-            )
-        }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            TabRow(selectedTabIndex = selectedTab) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        text = { Text(title) }
-                    )
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(300.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(top = 24.dp)
+            ) {
+                LazyColumn {
+                    items(tabs) { tab ->
+                        val isSelected = selectedTab == tabs.indexOf(tab)
+                        NavigationDrawerItem(
+                            label = { Text(tab) },
+                            selected = isSelected,
+                            onClick = {
+                                selectedTab = tabs.indexOf(tab)
+                                scope.launch { drawerState.close() }
+                            },
+                            modifier = Modifier.padding(horizontal = 12.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                unselectedContainerColor = MaterialTheme.colorScheme.surface,
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                    }
                 }
             }
-            when (selectedTab) {
-                0 -> StudentInfo().StudentScreen()
-                1 -> TeachersInfo().TeacherScreen()
-                2 -> SubjectInfo().SubjectScreen()
-                3 -> ScheduleInfo().ScheduleScreen()
-                4 -> AttendanceInfo().AttendanceScreen()
-                5 -> PerformanceInfo().PerformanceScreen()
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("SUSR") },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch {
+                                if (drawerState.isOpen) drawerState.close() else drawerState.open()
+                            }
+                        }) {
+                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(modifier = Modifier.padding(innerPadding)) {
+                when (selectedTab) {
+                    0 -> StudentScreen(getDummyStudents())
+                    1 -> TeacherScreen(getDummyTeachers())
+                    2 -> SubjectScreen(getDummySubjects())
+                    3 -> ScheduleScreen(getDummySchedules())
+                    4 -> AttendanceScreenInfo(getDummyAttendance())
+                    5 -> PerformanceScreen(getDummyPerformances())
+                }
             }
         }
     }
 }
-
-
-
-

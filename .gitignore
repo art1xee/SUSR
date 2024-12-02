@@ -1,29 +1,39 @@
-### IntelliJ IDEA ###
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
+### Android/Kotlin specific ###
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.idea/
+build/
+/captures/
+.externalNativeBuild/
+.cxx/
 
-### Eclipse ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+### Android Studio ###
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+### Build files ###
+/app/build/
+/app/release/
+/app/debug/
 
-### VS Code ###
-.vscode/
+### Keystore files ###
+*.jks
+*.keystore
 
-### Mac OS ###
-.DS_Store
+### Log Files ###
+*.log
+
+### Android Studio Navigation editor temp files ###
+.navigation/
+
+### Android Studio captures folder ###
+captures/
+
+### Gradle files ###
+gradle-app.setting
+.gradletasknamecache
