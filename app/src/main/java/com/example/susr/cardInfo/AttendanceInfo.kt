@@ -1,5 +1,6 @@
 package com.example.susr.cardInfo
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,9 +26,10 @@ data class Attendance(
     val status: String,
 )
 
+
 @Composable
 fun AttendanceScreenInfo(
-    attendance: List<Attendance>
+    attendance: List<Attendance>,
 ) {
     val selectedDate by remember { mutableStateOf(LocalDate.now()) }
 
@@ -92,7 +94,7 @@ fun AttendanceItem(
     student: String,
     date: String,
     subject: String,
-    status: String
+    status: String,
 ) {
     Card(
         modifier = Modifier
